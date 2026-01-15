@@ -58,7 +58,6 @@ extension ViewController: UIPickerViewDelegate {
     
     
     /// passes the selected currency (row) in the UIPicker to the method in the CoinManager
-   
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
         print(row) // debug line
