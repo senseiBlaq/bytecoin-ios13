@@ -11,6 +11,7 @@ import Foundation
 
 protocol CoinManagerDelegate {
     
+    func didUpdatePrice (_ coinManager: CoinManager, coinModel: CoinModel)
     func didFailWithError(_ coinManager: CoinManager, error: Error)
 }
 
@@ -29,7 +30,7 @@ struct CoinManager {
     func getCoinPrice (for currency: String) {
         let getURLstring = "\(baseURL)/\(currency)?apikey=\(apiKey)"
         
-        print(getURLstring)//debug line to check code
+//        print(getURLstring)//test line
         perfomGet(with: getURLstring)
     }
     
@@ -50,8 +51,12 @@ struct CoinManager {
                 }
                 
                 if let safeData = data {
-                    let testResult = parseJSON(safeData)
-                    print(testResult)
+                    
+                    if let coin = parseJSON(safeData){ // this has to be unwrapped because it returns an optional
+                        
+                        self.delegate?.didUpdatePrice(self, coinModel: coin)
+                        print(coin.lastPrice, coin.currency) // this is a test line 
+                    }
                 }
 
 //                let dataString = String(data: data!, encoding: .utf8)
@@ -65,15 +70,19 @@ struct CoinManager {
     
     /// decodes the data received from the webservice by using thre JSONdecode class and a custom CoinData
     /// - Parameter data is the object holding the information received from the request
-    func parseJSON (_ data: Data) -> Double? {
+    /// returns an optional so that catch block can return a nil
+    func parseJSON (_ data: Data) -> CoinModel? {
         
         let decoder = JSONDecoder()
         do{
             
             let decodedData = try decoder.decode(CoinData.self, from: data)
-            let lastPrice = decodedData.rate
+            let rate = decodedData.rate
+            let currency = decodedData.asset_id_quote
             
-            return lastPrice
+            let coin = CoinModel(lastPrice: rate, currency: currency)
+            
+            return coin
         } catch {
             
             delegate?.didFailWithError(self, error:error)

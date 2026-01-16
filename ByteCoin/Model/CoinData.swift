@@ -8,6 +8,8 @@
 
 import Foundation
 
-struct CoinData:Codable {
+struct CoinData:Codable { // this the same structure as the JSON 
+    
     let rate: Double
+    let asset_id_quote: String
 }
